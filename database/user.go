@@ -28,3 +28,7 @@ func (user *User) CheckPassword(providedPassword string) error {
 	}
 	return nil
 }
+
+func CreateUser(user User) error {
+	return Instance.Create(&user).Error
+}

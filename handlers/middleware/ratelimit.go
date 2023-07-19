@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/time/rate"
 	"net/http"
@@ -44,7 +43,7 @@ func RateLimited() gin.HandlerFunc {
 
 		if !clients[limitKey].limiter.Allow() {
 			mutex.Unlock()
-			ctx.AbortWithError(http.StatusTooManyRequests, errors.New("requests limit hit"))
+			ctx.AbortWithStatus(http.StatusTooManyRequests)
 			return
 		}
 		mutex.Unlock()

@@ -2,19 +2,20 @@ package main
 
 import (
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/mohammed-maher/auth-service/config"
 	"github.com/mohammed-maher/auth-service/database"
 	"github.com/mohammed-maher/auth-service/handlers"
 	"log"
-	"os"
 )
 
 func main() {
 
-	connectionString := os.Getenv("DB_DSN")
-	log.Println("establishing db connection at: ", connectionString)
+	// load config
+	conf := config.Load()
+	log.Println("establishing db connection at: ", conf.DB_DSN)
 
 	// connect to database
-	if err := database.Connect(os.Getenv("DB_DSN")); err != nil {
+	if err := database.Connect(conf.DB_DSN); err != nil {
 		log.Fatal("failed to establish db connection: ", err)
 	}
 
@@ -30,9 +31,10 @@ func main() {
 	if err != nil {
 		log.Println("failed to set router trusted proxies")
 	}
-	err = r.Run(":9000")
+	err = r.Run(":" + conf.PORT)
+
 	if err != nil {
-		log.Fatal("failed to start server ", err)
+		log.Fatal("failed to start server on port", conf.PORT, err)
 	}
 
 }
