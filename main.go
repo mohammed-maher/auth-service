@@ -1,11 +1,9 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/mohammed-maher/auth-service/database"
 	"github.com/mohammed-maher/auth-service/handlers"
-	"github.com/mohammed-maher/auth-service/handlers/middleware"
 	"log"
 	"os"
 )
@@ -26,29 +24,15 @@ func main() {
 		log.Println("failed to migrate db with error ", err)
 	}
 
-	// run webserver
-	if err := Serve(); err != nil {
-		log.Fatal("failed to init server: ", err)
-	}
-
-}
-
-func Serve() error {
-	router := gin.Default()
-	v1 := router.Group("api/v1")
-	{
-		v1.POST("login", handlers.Login)
-		v1.POST("register", handlers.RegisterUser)
-		protected := v1.Group("protected").Use(middleware.Auth())
-		{
-			protected.GET("ping", handlers.Ping)
-		}
-	}
-
-	err := router.SetTrustedProxies([]string{"127.0.0.1"})
+	// listen and serve
+	r := handlers.SetupRouter()
+	err := r.SetTrustedProxies([]string{"127.0.0.1"})
 	if err != nil {
-		return err
+		log.Println("failed to set router trusted proxies")
+	}
+	err = r.Run(":9000")
+	if err != nil {
+		log.Fatal("failed to start server ", err)
 	}
 
-	return router.Run(":9000")
 }
